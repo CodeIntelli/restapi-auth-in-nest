@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
+import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
+import { LocalStrategy } from './local.startegy';
+import { SessionSerializer } from './session.serializer';
 
 @Module({
-  controllers: [AuthController],
-  providers: [AuthService]
+  imports: [UsersModule, PassportModule],
+  providers: [AuthService, LocalStrategy, SessionSerializer]
 })
-export class AuthModule {}
+export class AuthModule { }
