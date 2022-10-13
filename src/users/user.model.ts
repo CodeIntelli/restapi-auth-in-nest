@@ -1,6 +1,9 @@
 import * as mongoose from "mongoose";
 import * as bcrypt from 'bcrypt';
 
+enum Role {
+    CEO = 'CEO', MANAGER = 'MANAGER', HR = 'HR', OTHER = 'OTHER'
+}
 export const UserSchema = new mongoose.Schema(
     {
         username: {
@@ -12,6 +15,11 @@ export const UserSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        role: {
+            type: String,
+            default: Role.CEO,
+            enum: Role,
+        }
     },
     { timestamps: true }
 )

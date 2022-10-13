@@ -11,7 +11,7 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot(),
     UserModule,
     AuthModule,
-    MongooseModule.forRoot('mongodb://localhost:27017/Restapis', {
+    MongooseModule.forRoot(process.env.DB_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })

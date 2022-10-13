@@ -20,9 +20,7 @@ export class UserService {
         if (user) {
             throw new HttpException('user already exists', HttpStatus.BAD_REQUEST);
         }
-
         const createdUser = new this.userModel(RegisterDTO);
-
 
         await createdUser.save();
         return this.sanitizeUser(createdUser);
