@@ -1,4 +1,6 @@
-import * as mongoose from "mongoose"
+import * as mongoose from "mongoose";
+import * as bcrypt from 'bcrypt';
+
 export const UserSchema = new mongoose.Schema(
     {
         username: {
@@ -14,8 +16,16 @@ export const UserSchema = new mongoose.Schema(
     { timestamps: true }
 )
 
-export interface User extends mongoose.Document {
-    _id: string;
-    username: string;
-    password: string;
-}
+// @ts-ignore
+UserSchema.pre('save', async function (next: mongoose.HookNextFunction) {
+    try {
+        if (!this.isModified('password')) {
+            return next();
+        }
+        const hashed = await bcrypt.hash(this['password'], 10);
+        this['password'] = hashed;
+        return next();
+    } catch (err) {
+        return next(err);
+    }
+});

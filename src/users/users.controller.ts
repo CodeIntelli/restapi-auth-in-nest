@@ -1,50 +1,32 @@
 import { Body, Controller, Post, UseGuards, Request, Get } from '@nestjs/common';
-import { UsersService } from './users.service';
-import * as bcrypt from 'bcrypt';
-import { LocalAuthGuard } from 'src/auth/local.auth.guard';
-import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
+import { UserService } from './users.service';
+import { AuthService } from 'src/auth/auth.service';
+import { RegisterDTO } from './register.dto';
+import { LoginDTO } from 'src/auth/login.dto';
 
 @Controller('users')
 export class UsersController {
-    constructor(private readonly usersService: UsersService) { }
+    constructor(private usersService: UserService,
+        private authService: AuthService) { }
 
-    //post / signup
-    @Post('/signup')
-    async addUser(
-        @Body('password') userPassword: string,
-        @Body('username') userName: string,
-    ) {
-        const saltOrRounds = 10;
-        const hashedPassword = await bcrypt.hash(userPassword, saltOrRounds);
-        const result = await this.usersService.insertUser(
-            userName,
-            hashedPassword,
-        );
-        return {
-            msg: 'User successfully registered',
-            userId: result.id,
-            userName: result.username
+    @Post('register')
+    async register(@Body() RegisterDTO: RegisterDTO) {
+        const user = await this.usersService.create(RegisterDTO);
+        const payload = {
+
+            username: user.username,
         };
+
+        const token = await this.authService.signPayload(payload);
+        return { user, token };
     }
-    //Post / Login
-    @Post('/login')
-    @UseGuards(LocalAuthGuard)
-    login(@Request() req): any {
-        return {
-            User: req.user,
-            msg: 'User logged in'
+    @Post('login')
+    async login(@Body() UserDTO: LoginDTO) {
+        const user = await this.usersService.findByLogin(UserDTO);
+        const payload = {
+            username: user.username,
         };
-    }
-    // Get / protected
-    @UseGuards(AuthenticatedGuard)
-    @Get('/protected')
-    getHello(@Request() req): string {
-        return req.user;
-    }
-    //Get / logout
-    @Get('/logout')
-    logout(@Request() req): any {
-        req.session.destroy();
-        return { msg: 'The user session has ended' }
+        const token = await this.authService.signPayload(payload);
+        return { user, token };
     }
 }
